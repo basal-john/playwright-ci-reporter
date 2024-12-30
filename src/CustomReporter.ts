@@ -186,6 +186,16 @@ export default class CustomReporterConfig implements Reporter {
             passedDurations.length > 0 ? passedDurations.reduce((a, b) => a + b, 0) / passedDurations.length : 0;
         const slowestTest = passedDurations.length > 0 ? Math.max(...passedDurations) : 0;
 
+        // Compute the top 3 slowest tests
+        const slowestTests = Array.from(this.testRecords.values())
+            .flatMap(({ test, attempts }) =>
+                attempts
+                    .filter((a) => a.status === 'passed')
+                    .map((a) => ({ title: test.title, duration: a.duration }))
+            )
+            .sort((a, b) => b.duration - a.duration)
+            .slice(0, 3);
+
         console.log(`\n`);
         if (failures.length > 0) {
             console.log(
@@ -195,6 +205,12 @@ export default class CustomReporterConfig implements Reporter {
             console.log(`${colors.fgMagenta}- Average passed test time: ${averageTime.toFixed(2)}s${colors.reset}`);
             if (slowestTest > 0) {
                 console.log(`${colors.fgMagenta}- Slowest test took: ${slowestTest.toFixed(2)}s${colors.reset}`);
+                console.log(`${colors.fgMagenta}- Top 3 slowest tests:${colors.reset}`);
+                slowestTests.forEach((test, index) => {
+                    console.log(
+                        `${colors.reset}  ${index + 1}. ${test.title}:${colors.reset} ${colors.fgYellow}${test.duration.toFixed(2)}s${colors.reset}`
+                    );
+                });
             }
             console.log(`${colors.fgMagenta}- Total retries: ${totalRetries}${colors.reset}`);
 
