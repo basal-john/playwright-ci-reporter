@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.2.0](https://github.com/basal-john/playwright-ci-reporter/compare/v1.1.19...v1.2.0) (2024-12-30)
+
+
+### Features
+
+* add top 3 slowest tests ([6eccdde](https://github.com/basal-john/playwright-ci-reporter/commit/6eccdde93939fb18e5daabdb5b80c7ae8a2e5215))
+
 ### [1.1.19](https://github.com/basal-john/playwright-ci-reporter/compare/v1.1.18...v1.1.19) (2024-12-29)
 
 ### [1.1.18](https://github.com/basal-john/playwright-ci-reporter/compare/v1.1.17...v1.1.18) (2024-12-20)
