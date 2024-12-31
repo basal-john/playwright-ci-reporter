@@ -1,6 +1,6 @@
 {
     "name": "playwright-ci-reporter",
-    "version": "1.2.0",
+    "version": "1.2.1",
     "description": "A CI-friendly custom reporter for Playwright tests with enhanced logging.",
     "main": "dist/CustomReporter.js",
     "types": "dist/CustomReporter.d.ts",
