@@ -181,6 +181,12 @@ export default class CustomReporterConfig implements Reporter {
             }
         }
 
+        // Check if no tests were found
+        if (testCount === 0) {
+            console.log(`${colors.fgRed}❌ No tests found${colors.reset}`);
+            process.exit(1);
+        }
+
         // Compute average + slowest durations
         const averageTime =
             passedDurations.length > 0 ? passedDurations.reduce((a, b) => a + b, 0) / passedDurations.length : 0;
@@ -188,10 +194,8 @@ export default class CustomReporterConfig implements Reporter {
 
         // Compute the top 3 slowest tests
         const slowestTests = Array.from(this.testRecords.values())
-            .flatMap(({ test, attempts }) =>
-                attempts
-                    .filter((a) => a.status === 'passed')
-                    .map((a) => ({ title: test.title, duration: a.duration }))
+            .flatMap(({test, attempts}) =>
+                attempts.filter((a) => a.status === 'passed').map((a) => ({title: test.title, duration: a.duration})),
             )
             .sort((a, b) => b.duration - a.duration)
             .slice(0, 3);
@@ -208,7 +212,7 @@ export default class CustomReporterConfig implements Reporter {
                 console.log(`${colors.fgMagenta}- Top 3 slowest tests:${colors.reset}`);
                 slowestTests.forEach((test, index) => {
                     console.log(
-                        `${colors.reset}  ${index + 1}. ${test.title}:${colors.reset} ${colors.fgYellow}${test.duration.toFixed(2)}s${colors.reset}`
+                        `${colors.reset}  ${index + 1}. ${test.title}:${colors.reset} ${colors.fgYellow}${test.duration.toFixed(2)}s${colors.reset}`,
                     );
                 });
             }
