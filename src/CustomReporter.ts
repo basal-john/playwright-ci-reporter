@@ -1,28 +1,7 @@
 import {Reporter, TestCase, TestResult} from '@playwright/test/reporter';
-import fs from 'fs';
 import {colors} from './Colors';
-
-const FAILURE_QUOTES = [
-    '“Houston, we have a problem.” - Apollo 13',
-    '“Failure is not an option.” - Apollo 13',
-    '“Why so serious?” - The Dark Knight',
-    '“I find your lack of passing disturbing.” - Darth Vader',
-    "“It's not a bug, it's a feature!” - Every developer ever",
-    'Oh, crap, it failed! But it worked on my machine!',
-    "Tests won't fail if you have no tests!",
-    'PLEASE LET ME MERGE BEFORE I START CRYING!',
-    '“You can’t handle the truth!” - A Few Good Men',
-];
-
-const SUCCESS_QUOTES = [
-    '“Hasta la vista, baby.” - The Terminator',
-    '“All systems go!” - NASA',
-    '“That’s one small step for man, one giant leap for… tests!” - Apollo 11',
-    '“Victory is ours!” - Braveheart',
-    "“I'm king of the world!” - Titanic",
-    '“You’re a wizard, Harry!” - Harry Potter',
-    '“Live long and prosper.” - Star Trek',
-];
+import {getRandomQuote, FAILURE_QUOTES, SUCCESS_QUOTES} from './Quotes';
+import {writeJsonSummary} from './SummaryWriter';
 
 interface AttemptInfo {
     status: TestResult['status'];
@@ -43,15 +22,6 @@ export default class CustomReporterConfig implements Reporter {
     private setupFailures: {message: string; stack?: string}[] = [];
     private startTime: number = 0;
     private environmentUrl: string | undefined = process.env.TEST_URL || '';
-
-    /**
-     * Returns a random quote from the provided list.
-     * @param {string[]} quotes - Array of quotes to choose from.
-     * @returns {string} A random quote.
-     */
-    private getRandomQuote(quotes: string[]): string {
-        return quotes[Math.floor(Math.random() * quotes.length)];
-    }
 
     /**
      * Called when the test run begins.
@@ -135,29 +105,82 @@ export default class CustomReporterConfig implements Reporter {
         const endTime = Date.now();
         const totalTimeSec = (endTime - this.startTime) / 1000;
         const totalTimeDisplay =
-            totalTimeSec < 60 ? `${totalTimeSec.toFixed(2)}s` : `${(totalTimeSec / 60).toFixed(2)}min`; // Convert to min only if >= 60s
+            totalTimeSec < 60 ? `${totalTimeSec.toFixed(2)}s` : `${(totalTimeSec / 60).toFixed(2)}min`;
 
+        const {passedCount, failedCount, skippedCount, testCount, totalRetries, failures, passedDurations} =
+            this.processTestResults();
+
+        if (testCount === 0) {
+            console.log(`${colors.fgRed}❌ No tests found${colors.reset}`);
+            process.exit(1);
+        }
+
+        const averageTime = this.computeAverageTime(passedDurations);
+        const slowestTest = this.computeSlowestTest(passedDurations);
+        const slowestTests = this.computeTopSlowestTests();
+
+        this.logSummary(
+            failures,
+            testCount,
+            passedCount,
+            totalTimeDisplay,
+            averageTime,
+            slowestTest,
+            slowestTests,
+            totalRetries,
+        );
+
+        if (failures.length > 0) {
+            this.logFailures(failures);
+            console.log(`${colors.fgRed}"${getRandomQuote(FAILURE_QUOTES)}"${colors.reset}`);
+            writeJsonSummary(
+                this.startTime,
+                endTime,
+                totalTimeSec,
+                averageTime,
+                slowestTest,
+                testCount,
+                passedCount,
+                failedCount,
+                skippedCount,
+                totalRetries,
+                failures,
+                this.environmentUrl,
+            );
+            process.exit(1);
+        } else {
+            console.log(`${colors.fgGreen}"${getRandomQuote(SUCCESS_QUOTES)}"${colors.reset}`);
+            writeJsonSummary(
+                this.startTime,
+                endTime,
+                totalTimeSec,
+                averageTime,
+                slowestTest,
+                testCount,
+                passedCount,
+                failedCount,
+                skippedCount,
+                totalRetries,
+                [],
+                this.environmentUrl,
+            );
+            process.exit(0);
+        }
+    }
+
+    private processTestResults() {
         let passedCount = 0;
         let failedCount = 0;
         let skippedCount = 0;
         let testCount = 0;
         let totalRetries = 0;
-        const failures: {
-            title: string;
-            message: string;
-            stack: string;
-            timeTaken: number;
-            isTimeout: boolean;
-        }[] = [];
+        const failures: {title: string; message: string; stack: string; timeTaken: number; isTimeout: boolean}[] = [];
         const passedDurations: number[] = [];
 
-        // Process final outcomes
         for (const {test, attempts} of this.testRecords.values()) {
             testCount++;
             const finalOutcome = test.outcome();
             const finalAttempt = attempts[attempts.length - 1];
-
-            // Count retries if multiple attempts were made
             const testRetries = attempts.length > 1 ? attempts.length - 1 : 0;
             totalRetries += testRetries;
 
@@ -168,7 +191,6 @@ export default class CustomReporterConfig implements Reporter {
                 failedCount++;
                 const isTimeout = finalAttempt.errors.some((e) => e.message.includes('timeout'));
                 const combinedStack = finalAttempt.errors.map((e) => e.stack || '').join('\n');
-
                 failures.push({
                     title: test.title,
                     message: '',
@@ -181,25 +203,36 @@ export default class CustomReporterConfig implements Reporter {
             }
         }
 
-        // Check if no tests were found
-        if (testCount === 0) {
-            console.log(`${colors.fgRed}❌ No tests found${colors.reset}`);
-            process.exit(1);
-        }
+        return {passedCount, failedCount, skippedCount, testCount, totalRetries, failures, passedDurations};
+    }
 
-        // Compute average + slowest durations
-        const averageTime =
-            passedDurations.length > 0 ? passedDurations.reduce((a, b) => a + b, 0) / passedDurations.length : 0;
-        const slowestTest = passedDurations.length > 0 ? Math.max(...passedDurations) : 0;
+    private computeAverageTime(passedDurations: number[]): number {
+        return passedDurations.length > 0 ? passedDurations.reduce((a, b) => a + b, 0) / passedDurations.length : 0;
+    }
 
-        // Compute the top 3 slowest tests
-        const slowestTests = Array.from(this.testRecords.values())
+    private computeSlowestTest(passedDurations: number[]): number {
+        return passedDurations.length > 0 ? Math.max(...passedDurations) : 0;
+    }
+
+    private computeTopSlowestTests() {
+        return Array.from(this.testRecords.values())
             .flatMap(({test, attempts}) =>
                 attempts.filter((a) => a.status === 'passed').map((a) => ({title: test.title, duration: a.duration})),
             )
             .sort((a, b) => b.duration - a.duration)
             .slice(0, 3);
+    }
 
+    private logSummary(
+        failures: any[],
+        testCount: number,
+        passedCount: number,
+        totalTimeDisplay: string,
+        averageTime: number,
+        slowestTest: number,
+        slowestTests: any[],
+        totalRetries: number,
+    ) {
         console.log(`\n`);
         if (failures.length > 0) {
             console.log(
@@ -217,36 +250,6 @@ export default class CustomReporterConfig implements Reporter {
                 });
             }
             console.log(`${colors.fgMagenta}- Total retries: ${totalRetries}${colors.reset}`);
-
-            console.log(`${colors.fgRed}\nFailures:${colors.reset}`);
-            failures.forEach((failure, index) => {
-                console.group(`--- Failure #${index + 1} ---`);
-                console.log(`  Test: ${failure.title}`);
-                if (failure.stack) {
-                    console.log(`  Stack Trace:\n${failure.stack}`);
-                }
-                if (failure.isTimeout) {
-                    console.log(`${colors.fgYellow}  (This failure involved a timeout.)${colors.reset}`);
-                }
-                console.groupEnd();
-            });
-
-            console.log(`${colors.fgRed}\n❌ Tests failed with exit code 1${colors.reset}`);
-            console.log(`${colors.fgRed}"${this.getRandomQuote(FAILURE_QUOTES)}"${colors.reset}`);
-
-            this.writeJsonSummary(
-                endTime,
-                totalTimeSec,
-                averageTime,
-                slowestTest,
-                testCount,
-                passedCount,
-                failedCount,
-                skippedCount,
-                totalRetries,
-                failures,
-            );
-            process.exit(1);
         } else {
             console.log(
                 `${colors.fgGreen}✅ All ${testCount} tests passed | ⏱ Total: ${totalTimeDisplay}${colors.reset}`,
@@ -256,64 +259,22 @@ export default class CustomReporterConfig implements Reporter {
                 console.log(`${colors.fgMagenta}- Slowest test took: ${slowestTest.toFixed(2)}s${colors.reset}`);
             }
             console.log(`${colors.fgMagenta}- Total retries: ${totalRetries}${colors.reset}`);
-            console.log(`${colors.fgGreen}"${this.getRandomQuote(SUCCESS_QUOTES)}"${colors.reset}`);
-
-            this.writeJsonSummary(
-                endTime,
-                totalTimeSec,
-                averageTime,
-                slowestTest,
-                testCount,
-                passedCount,
-                failedCount,
-                skippedCount,
-                totalRetries,
-                [],
-            );
-            process.exit(0);
         }
     }
 
-    /**
-     * Writes a JSON summary of the test results to a file.
-     * @param {number} endTime - The end time of the test run.
-     * @param {number} totalTimeSec - The total time taken for the test run in seconds.
-     * @param {number} averageTime - The average duration of passed tests in seconds.
-     * @param {number} slowestTest - The duration of the slowest test in seconds.
-     * @param {number} totalTests - The total number of tests run.
-     * @param {number} passed - The number of tests that passed.
-     * @param {number} failed - The number of tests that failed.
-     * @param {number} skipped - The number of tests that were skipped.
-     * @param {number} totalRetries - The total number of retries across all tests.
-     * @param {any[]} failures - An array of failure details.
-     */
-    private writeJsonSummary(
-        endTime: number,
-        totalTimeSec: number,
-        averageTime: number,
-        slowestTest: number,
-        totalTests: number,
-        passed: number,
-        failed: number,
-        skipped: number,
-        totalRetries: number,
-        failures: any[],
-    ) {
-        const summary = {
-            startTime: this.startTime,
-            endTime,
-            totalTimeSeconds: totalTimeSec,
-            totalTests,
-            passed,
-            failed,
-            skipped,
-            failures,
-            averageTestDurationSeconds: averageTime,
-            slowestTestDurationSeconds: slowestTest,
-            totalRetries,
-            environmentUrl: this.environmentUrl,
-        };
-
-        fs.writeFileSync('test-results.json', JSON.stringify(summary, null, 2));
+    private logFailures(failures: any[]) {
+        console.log(`${colors.fgRed}\nFailures:${colors.reset}`);
+        failures.forEach((failure, index) => {
+            console.group(`--- Failure #${index + 1} ---`);
+            console.log(`  Test: ${failure.title}`);
+            if (failure.stack) {
+                console.log(`  Stack Trace:\n${failure.stack}`);
+            }
+            if (failure.isTimeout) {
+                console.log(`${colors.fgYellow}  (This failure involved a timeout.)${colors.reset}`);
+            }
+            console.groupEnd();
+        });
+        console.log(`${colors.fgRed}\n❌ Tests failed with exit code 1${colors.reset}`);
     }
 }
