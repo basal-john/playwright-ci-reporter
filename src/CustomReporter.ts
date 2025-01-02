@@ -130,6 +130,17 @@ export default class CustomReporterConfig implements Reporter {
             totalRetries,
         );
 
+        // Log slowest tests regardless of pass or fail
+        if (slowestTest > 0) {
+            console.log(`${colors.fgMagenta}- Slowest test took: ${slowestTest.toFixed(2)}s${colors.reset}`);
+            console.log(`${colors.fgMagenta}- Top 3 slowest tests:${colors.reset}`);
+            slowestTests.forEach((test, index) => {
+                console.log(
+                    `${colors.reset}  ${index + 1}. ${test.title}:${colors.reset} ${colors.fgYellow}${test.duration.toFixed(2)}s${colors.reset}`,
+                );
+            });
+        }
+
         if (failures.length > 0) {
             this.logFailures(failures);
             console.log(`${colors.fgRed}"${getRandomQuote(FAILURE_QUOTES)}"${colors.reset}`);
