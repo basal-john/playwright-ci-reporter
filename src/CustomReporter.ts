@@ -1,7 +1,6 @@
 import {Reporter, TestCase, TestResult} from '@playwright/test/reporter';
 import {colors} from './Colors';
 import {getRandomQuote, FAILURE_QUOTES, SUCCESS_QUOTES} from './Quotes';
-import {writeJsonSummary} from './SummaryWriter';
 
 interface AttemptInfo {
     status: TestResult['status'];
@@ -144,37 +143,9 @@ export default class CustomReporterConfig implements Reporter {
         if (failures.length > 0) {
             this.logFailures(failures);
             console.log(`${colors.fgRed}"${getRandomQuote(FAILURE_QUOTES)}"${colors.reset}`);
-            writeJsonSummary(
-                this.startTime,
-                endTime,
-                totalTimeSec,
-                averageTime,
-                slowestTest,
-                testCount,
-                passedCount,
-                failedCount,
-                skippedCount,
-                totalRetries,
-                failures,
-                this.environmentUrl,
-            );
             process.exit(1);
         } else {
             console.log(`${colors.fgGreen}"${getRandomQuote(SUCCESS_QUOTES)}"${colors.reset}`);
-            writeJsonSummary(
-                this.startTime,
-                endTime,
-                totalTimeSec,
-                averageTime,
-                slowestTest,
-                testCount,
-                passedCount,
-                failedCount,
-                skippedCount,
-                totalRetries,
-                [],
-                this.environmentUrl,
-            );
             process.exit(0);
         }
     }
