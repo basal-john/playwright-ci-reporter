@@ -66,28 +66,6 @@ export default defineConfig({
 
 ---
 
-## **⚙️ Configuration**
-
-The reporter supports several configuration options to customize its behavior:
-
-```typescript
-{
-    // Time in seconds after which a test is considered slow
-    slowTestThreshold: 5,
-
-    // Maximum number of slow tests to show in the report
-    maxSlowTestsToShow: 3,
-
-    // Time in seconds after which to show a timeout warning
-    timeoutWarningThreshold: 30,
-
-    // Whether to show stack traces in error reports
-    showStackTrace: true
-}
-```
-
----
-
 ## **📋 Output Examples**
 
 ### **Successful Run**
