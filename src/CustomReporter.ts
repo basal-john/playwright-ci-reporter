@@ -5,13 +5,27 @@ import {TestRecord, ReporterConfig, TestSummary} from './types';
 import {TestUtils, Logger} from './utils';
 
 /**
- * Modern, maintainable custom reporter for Playwright tests.
+ * CustomReporterConfig is a modern, maintainable reporter for Playwright tests.
+ * It provides detailed, colorized output of test results with comprehensive metrics
+ * and configurable options for better visibility into test execution.
+ *
+ * Features:
+ * - Colorized output for different test states (passed, failed, skipped, retried)
+ * - Detailed metrics including test duration and slow test identification
+ * - Configurable thresholds for slow tests and timeouts
+ * - Comprehensive error reporting with stack traces
+ * - Support for test retries with clear status indication
  */
 export default class CustomReporterConfig implements Reporter {
     private readonly _testRecords = new Map<string, TestRecord>();
     private _startTime: number = 0;
     private readonly _config: Required<ReporterConfig>;
 
+    /**
+     * Creates a new instance of the CustomReporterConfig.
+     *
+     * @param config - Optional configuration object to customize reporter behavior
+     */
     constructor(config: ReporterConfig = {}) {
         this._config = {
             slowTestThreshold: config.slowTestThreshold ?? 5,
@@ -21,11 +35,21 @@ export default class CustomReporterConfig implements Reporter {
         };
     }
 
+    /**
+     * Called when the test run begins.
+     * Initializes the start time and displays a start message.
+     */
     public onBegin(): void {
         console.log(`${colors.fgCyan}🚀 Test run started!${colors.reset}`);
         this._startTime = Date.now();
     }
 
+    /**
+     * Called when an error occurs during test setup or teardown.
+     * Logs the error with optional stack trace based on configuration.
+     *
+     * @param error - The error that occurred
+     */
     public onError(error: Error): void {
         console.error(`${colors.fgRed}❌ Setup or runtime error: ${error.message}${colors.reset}`);
         if (error.stack && this._config.showStackTrace) {
@@ -33,6 +57,13 @@ export default class CustomReporterConfig implements Reporter {
         }
     }
 
+    /**
+     * Called when a test completes (whether passed, failed, or skipped).
+     * Records the test result and logs appropriate output based on the test status.
+     *
+     * @param test - The test case that completed
+     * @param result - The result of the test execution
+     */
     public onTestEnd(test: TestCase, result: TestResult): void {
         const title = test.title;
         const timeTakenSec = result.duration / 1000;
@@ -65,13 +96,19 @@ export default class CustomReporterConfig implements Reporter {
         }
     }
 
+    /**
+     * Called when all tests have completed.
+     * Processes results, displays summary statistics, and sets appropriate exit code.
+     */
     public onEnd(): void {
         const endTime = Date.now();
         const totalTimeSec = (endTime - this._startTime) / 1000;
         const totalTimeDisplay = TestUtils.formatTime(totalTimeSec);
 
         // Process results
-        const {passedCount, testCount, failures, passedDurations} = TestUtils.processTestResults(this._testRecords);
+        const {passedCount, testCount, skippedCount, failures, passedDurations} = TestUtils.processTestResults(
+            this._testRecords,
+        );
 
         // Handle no tests case
         if (testCount === 0) {
@@ -84,6 +121,7 @@ export default class CustomReporterConfig implements Reporter {
             failures,
             testCount,
             passedCount,
+            skippedCount,
             totalTimeDisplay,
             averageTime: TestUtils.calculateAverageTime(passedDurations),
             slowestTest: Math.max(...passedDurations, 0),
@@ -103,6 +141,15 @@ export default class CustomReporterConfig implements Reporter {
         }
     }
 
+    /**
+     * Formats and logs the outcome of a single test with appropriate coloring.
+     * Handles different test states (passed, failed, skipped) and retry attempts.
+     *
+     * @param title - The title of the test
+     * @param result - The result of the test execution
+     * @param timeTakenSec - The time taken by the test in seconds
+     * @private
+     */
     private _logTestOutcome(title: string, result: TestResult, timeTakenSec: number): void {
         const timeTakenFormatted = timeTakenSec.toFixed(2);
 
