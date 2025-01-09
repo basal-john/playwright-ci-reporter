@@ -1,24 +1,41 @@
 # **Playwright CI Reporter**
 
-A CI-friendly custom reporter for Playwright tests, providing enhanced logging, failure summaries, and a touch of humor. This reporter makes debugging and tracking test results easier while adding some personality to your test logs.
+A modern, maintainable custom reporter for Playwright tests that enhances your test output with colorized results, comprehensive metrics, and intelligent failure analysis. Perfect for CI/CD pipelines and local development.
 
----
+## **✨ Features**
 
-- 🎨 **Colorized Output**:
+- 🎨 **Smart Colorized Output**:
 
     - ✅ Passed tests (Green)
     - ❌ Failed tests (Red)
     - 🔄 Retry attempts (Yellow)
     - ⚠️ Skipped tests (Gray)
+    - 🚀 Test run status (Cyan)
 
-- 📊 **Detailed Metrics**:
-    - Total test execution time
-    - Average test duration
+- 📊 **Comprehensive Metrics**:
+
+    - Total execution time with smart formatting
+    - Average test duration analysis
     - Slowest test identification
-    - Top slowest tests list
-    - Pass/fail statistics
+    - Top slowest tests ranking
+    - Pass/fail/skip statistics
 
-## **Installation**
+- 🛠 **Advanced Features**:
+
+    - Configurable slow test thresholds
+    - Timeout warnings
+    - Stack trace controls
+    - Retry attempt tracking
+    - Manual testing reminders for skipped tests
+
+- 📝 **Intelligent Reporting**:
+    - Detailed failure analysis
+    - Clear error messages
+    - Formatted stack traces
+    - Test timing insights
+    - Skipped test warnings
+
+## **🚀 Installation**
 
 Install the package using npm:
 
@@ -49,122 +66,107 @@ export default defineConfig({
 
 ---
 
-## **Example Logs**
+## **⚙️ Configuration**
 
-### **When Tests Pass**
+The reporter supports several configuration options to customize its behavior:
 
-```plaintext
-✅ Audit accessibility violations on the footer in 7.08s
-✅ Audit accessibility violations on Customer Center Login with active in 6.83s
+```typescript
+{
+    // Time in seconds after which a test is considered slow
+    slowTestThreshold: 5,
 
-✅ All 9 tests passed | ⏱ Total: 13.28s
-- Average passed test time: 6.30s
-- Slowest test took: 12.34s
-"“All systems go!” - NASA"
-```
+    // Maximum number of slow tests to show in the report
+    maxSlowTestsToShow: 3,
 
-### **When Tests Fail**
+    // Time in seconds after which to show a timeout warning
+    timeoutWarningThreshold: 30,
 
-```plaintext
-❌ Audit accessibility violations on MyThomann Login Page with active failed in 1.54s
-🔄 Retry attempt for "Audit accessibility violations on MyThomann Login Page with active" (failed) in 1.62s
-
-
-❌ 1 of 9 tests failed | 8 passed | ⏱ Total: 12.88s
-
-❌ Summary of Failures:
-
-Failure #1
-🚨 Test: Audit accessibility violations on the footer
-⏱ Time Taken: 5.36s
-📜 Error Message: expect(received).toBe(expected) // Object.is equality
-📜 Stack Trace:
-Error: expect(received).toBe(expected) // Object.is equality
-    at /path/to/test/file.test.ts:20:28
-
-“I find your lack of passing disturbing.” - Darth Vader
+    // Whether to show stack traces in error reports
+    showStackTrace: true
+}
 ```
 
 ---
 
-## **Configuration**
+## **📋 Output Examples**
 
-### **Reporter Options**
+### **Successful Run**
 
-This reporter logs:
+```plaintext
+🚀 Test run started!
+✅ Login test passed in 1.23s
+✅ API integration test passed in 2.45s
+⚠️ Payment test was skipped
 
-1. **Test Status**: Indicates whether a test has passed or failed.
-2. **Execution Time**: Logs how long each test took to execute.
-3. **Failure Summary**: Provides detailed information for failed tests, including:
-    - Error message
-    - Stack trace
-    - Execution time
+✅ All 3 tests passed | 1 skipped | ⏱ Total: 3.68s
 
-### **Output**
+Additional Metrics:
+- Average passed test time: 1.84s
+- Slowest test took: 2.45s
+- Top 3 slowest tests:
+  1. API integration test: 2.45s
+  2. Login test: 1.23s
 
-- **Console**: Real-time logs during test execution.
-- **File**: Logs saved to `logs/info.log` (default location).
+⚠️ Warning: 1 test was skipped.
+   Please ensure to test the skipped scenarios manually before deployment.
+```
 
----
+### **Failed Run**
 
-## **Customization**
+```plaintext
+🚀 Test run started!
+✅ Login test passed in 1.23s
+❌ API test failed in 2.45s
+🔄 Retry attempt for "API test" (failed) in 2.50s
+⚠️ Payment test was skipped
 
-If you wish to modify the behavior of this reporter, you can fork the repository or create your own implementation based on this package.
+❌ 1 of 3 tests failed | 1 passed | 1 skipped | ⏱ Total: 6.18s
 
----
-
-## **Development**
-
-To work on this package locally:
-
-1. Clone the repository:
-
-    ```bash
-    git clone https://github.com/basal-john/playwright-ci-reporter.git
-    cd playwright-ci-reporter
-    ```
-
-2. Install dependencies:
-
-    ```bash
-    npm install
-    ```
-
-3. Build the package:
-
-    ```bash
-    npm run build
-    ```
-
-4. Test it locally by linking it to another project:
-
-    ```bash
-    npm link
-    cd /path/to/your/playwright-project
-    npm link playwright-ci-reporter
-    ```
-
-5. Run tests in the Playwright project to verify the reporter:
-    ```bash
-    npx playwright test
-    ```
+Failures:
+--- Failure #1 ---
+  Test: API test
+  Stack Trace:
+    at Connection.connect (/src/api/connection.ts:45:7)
+```
 
 ---
 
-## **Future Enhancements**
+## **🤝 Contributing**
 
-- Add configurable output formats (e.g., JSON, HTML).
-- Support custom quotes or log formats.
-- Add support for other test runners (e.g., Jest, Mocha).
+We welcome contributions! Here's how you can help:
+
+1. Fork the repository
+2. Create your feature branch:
+    ```bash
+    git checkout -b feature/amazing-feature
+    ```
+3. Make your changes and commit them:
+    ```bash
+    git commit -m 'Add some amazing feature'
+    ```
+4. Push to your fork:
+    ```bash
+    git push origin feature/amazing-feature
+    ```
+5. Open a Pull Request
+
+Please ensure your PR:
+
+- Follows the existing code style
+- Includes appropriate tests
+- Updates documentation as needed
+- Describes the changes made
 
 ---
 
-## **Contributing**
+## **📝 License**
 
-Contributions are welcome! If you’d like to report a bug, suggest a feature, or contribute to the codebase, feel free to open an issue or submit a pull request.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-## **License**
+## **🙏 Acknowledgments**
 
-This package is licensed under the [MIT License](LICENSE).
+- Built with [Playwright](https://playwright.dev/)
+- Inspired by the need for better test reporting in CI/CD pipelines
+- Thanks to all contributors who help make this reporter better
