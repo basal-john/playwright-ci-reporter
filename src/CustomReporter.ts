@@ -107,14 +107,6 @@ export default class CustomReporterConfig implements Reporter {
 
         // Log test outcome with appropriate formatting
         this._logTestOutcome(test.title, result, timeTakenSec);
-
-        // Warn if test is taking longer than threshold
-        if (timeTakenSec > this._config.timeoutWarningThreshold) {
-            console.log(
-                `${colors.fgYellow}⚠️ Warning: Test "${title}" is taking longer than ` +
-                    `${this._config.timeoutWarningThreshold}s${colors.reset}`,
-            );
-        }
     }
 
     /**
@@ -176,20 +168,23 @@ export default class CustomReporterConfig implements Reporter {
 
         switch (result.status) {
             case 'passed':
-                const passMessage = result.retry > 0 ? `✅ Retried and passed: ${title}` : `✅ ${title}`;
+                const passMessage = result.retry > 0 ? `✅ ${title} passed after retry` : `✅ ${title}`;
                 console.log(`${colors.fgGreen}${passMessage} in ${timeTakenFormatted}s${colors.reset}`);
                 break;
 
             case 'failed':
             case 'timedOut':
-                const failMessage =
-                    result.retry > 0 ? `🔄 Retry attempt for "${title}" (${result.status})` : `❌ ${title} failed`;
-                const failColor = result.retry > 0 ? colors.fgYellow : colors.fgRed;
-                console.log(`${failColor}${failMessage} in ${timeTakenFormatted}s${colors.reset}`);
+                if (result.retry > 0) {
+                    console.log(
+                        `${colors.fgYellow}🔄 Retry attempt #${result.retry + 1} for "${title}"${colors.reset}`,
+                    );
+                } else {
+                    console.log(`${colors.fgRed}❌ ${title} failed in ${timeTakenFormatted}s${colors.reset}`);
+                }
                 break;
 
             case 'skipped':
-                console.log(`${colors.fgGray}⚠️ ${title} was skipped.${colors.reset}`);
+                console.log(`${colors.fgGray}⚠️ ${title} was skipped${colors.reset}`);
                 break;
         }
     }

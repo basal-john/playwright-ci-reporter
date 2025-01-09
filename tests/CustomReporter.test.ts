@@ -170,19 +170,16 @@ describe('CustomReporterConfig', () => {
 
             reporter.onTestEnd(test, result);
 
-            expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('🔄 Retry attempt'));
+            expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('🔄 Retry attempt #2 for "Test 1"'));
         });
 
-        it('should warn about slow tests', () => {
+        it('should log passed after retry correctly', () => {
             const test = createMockTest('Test 1');
-            const result = {
-                ...createMockResult('passed'),
-                duration: 31000, // 31 seconds
-            };
+            const result = createMockResult('passed', 1);
 
             reporter.onTestEnd(test, result);
 
-            expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Warning: Test'));
+            expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('✅ Test 1 passed after retry'));
         });
     });
 
