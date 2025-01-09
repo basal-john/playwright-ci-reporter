@@ -4,12 +4,11 @@ All notable changes to this project will be documented in this file. See [standa
 
 ## [1.4.0](https://github.com/basal-john/playwright-ci-reporter/compare/v1.3.1...v1.4.0) (2025-01-09)
 
-
 ### Features
 
-* add warning for skipped tests in Logger ([43a83a8](https://github.com/basal-john/playwright-ci-reporter/commit/43a83a82d9d47d1fad2aa5dce65067416932b05a))
-* enhance CustomReporter with detailed metrics and colorized output ([6cc7f6d](https://github.com/basal-john/playwright-ci-reporter/commit/6cc7f6d137f157aed2c67a7b95ee206f51979313))
-* expand CustomReporter and types with comprehensive test metrics and error handling ([409a002](https://github.com/basal-john/playwright-ci-reporter/commit/409a00206c164d3cf382b113549be9c87a3c1921))
+- add warning for skipped tests in Logger ([43a83a8](https://github.com/basal-john/playwright-ci-reporter/commit/43a83a82d9d47d1fad2aa5dce65067416932b05a))
+- enhance CustomReporter with detailed metrics and colorized output ([6cc7f6d](https://github.com/basal-john/playwright-ci-reporter/commit/6cc7f6d137f157aed2c67a7b95ee206f51979313))
+- expand CustomReporter and types with comprehensive test metrics and error handling ([409a002](https://github.com/basal-john/playwright-ci-reporter/commit/409a00206c164d3cf382b113549be9c87a3c1921))
 
 ### [1.3.1](https://github.com/basal-john/playwright-ci-reporter/compare/v1.3.0...v1.3.1) (2025-01-03)
 

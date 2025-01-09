@@ -1,4 +1,4 @@
-import {Reporter, TestCase, TestResult} from '@playwright/test/reporter';
+import {Reporter, TestCase, TestResult, FullConfig, Suite} from '@playwright/test/reporter';
 import {colors} from './Colors';
 import {getRandomQuote, FAILURE_QUOTES, SUCCESS_QUOTES} from './Quotes';
 import {TestRecord, ReporterConfig, TestSummary} from './types';
@@ -38,10 +38,31 @@ export default class CustomReporterConfig implements Reporter {
     /**
      * Called when the test run begins.
      * Initializes the start time and displays a start message.
+     *
+     * @param config - The full Playwright configuration
+     * @param suite - The root test suite
      */
-    public onBegin(): void {
-        console.log(`${colors.fgCyan}🚀 Test run started!${colors.reset}`);
+    public onBegin(config: FullConfig, suite: Suite): void {
+        const totalTestCount = this._countTests(suite);
+        console.log(
+            `${colors.fgMagentaBright}🚀 Starting test run: ${totalTestCount} tests using ${config.workers} workers${colors.reset}`,
+        );
         this._startTime = Date.now();
+    }
+
+    /**
+     * Recursively counts the total number of tests in a suite and its children
+     *
+     * @param suite - The test suite to count tests from
+     * @returns The total number of tests
+     * @private
+     */
+    private _countTests(suite: Suite): number {
+        let count = suite.tests.length;
+        for (const childSuite of suite.suites) {
+            count += this._countTests(childSuite);
+        }
+        return count;
     }
 
     /**

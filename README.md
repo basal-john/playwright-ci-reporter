@@ -10,7 +10,7 @@ A modern, maintainable custom reporter for Playwright tests that enhances your t
     - ❌ Failed tests (Red)
     - 🔄 Retry attempts (Yellow)
     - ⚠️ Skipped tests (Gray)
-    - 🚀 Test run status (Cyan)
+    - 🚀 Test run status (Bright Magenta)
 
 - 📊 **Comprehensive Metrics**:
 
@@ -71,7 +71,7 @@ export default defineConfig({
 ### **Successful Run**
 
 ```plaintext
-🚀 Test run started!
+🚀 Starting test run: 3 tests using 2 workers
 ✅ Login test passed in 1.23s
 ✅ API integration test passed in 2.45s
 ⚠️ Payment test was skipped
@@ -92,7 +92,7 @@ Additional Metrics:
 ### **Failed Run**
 
 ```plaintext
-🚀 Test run started!
+🚀 Starting test run: 3 tests using 2 workers
 ✅ Login test passed in 1.23s
 ❌ API test failed in 2.45s
 🔄 Retry attempt for "API test" (failed) in 2.50s

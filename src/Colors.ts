@@ -54,4 +54,5 @@ export const colors = {
     bgWhite: '\x1b[47m',
 
     fgGray: '\x1b[90m',
+    fgMagentaBright: '\x1b[95m',
 };

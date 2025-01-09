@@ -62,9 +62,56 @@ describe('CustomReporterConfig', () => {
     });
 
     describe('onBegin', () => {
-        it('should log start message', () => {
-            reporter.onBegin();
-            expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('Test run started!'));
+        const createMockConfig = (workers: number = 1) => ({
+            workers,
+            forbidOnly: false,
+            fullyParallel: false,
+            globalTimeout: 0,
+            maxFailures: 0,
+            metadata: {},
+            preserveOutput: 'always',
+            projects: [],
+            reporter: [],
+            reportSlowTests: null,
+            rootDir: '',
+            quiet: false,
+            shard: null,
+            updateSnapshots: 'missing',
+            version: '',
+            webServer: null,
+        });
+
+        const createMockSuite = (testCount: number = 1, childSuites: any[] = []) => ({
+            title: '',
+            location: {file: '', line: 0, column: 0},
+            suites: childSuites,
+            tests: Array(testCount).fill({
+                title: 'Test',
+                location: {file: '', line: 0, column: 0},
+            }),
+            project: () => ({name: '', testDir: '', outputDir: ''}),
+        });
+
+        it('should log start message with test and worker count', () => {
+            const mockConfig = createMockConfig(8);
+            const mockSuite = createMockSuite(5, [createMockSuite(2), createMockSuite(2, [createMockSuite(1)])]);
+
+            reporter.onBegin(mockConfig as any, mockSuite as any);
+
+            expect(consoleLogSpy).toHaveBeenCalledWith(
+                expect.stringContaining('🚀 Starting test run: 10 tests using 8 workers'),
+            );
+        });
+
+        it('should handle empty test suite', () => {
+            const mockConfig = createMockConfig(1);
+            const mockSuite = createMockSuite(0);
+
+            reporter.onBegin(mockConfig as any, mockSuite as any);
+
+            expect(consoleLogSpy).toHaveBeenCalledWith(
+                expect.stringContaining('🚀 Starting test run: 0 tests using 1 worker'),
+            );
         });
     });
 
