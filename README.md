@@ -4,15 +4,19 @@ A CI-friendly custom reporter for Playwright tests, providing enhanced logging, 
 
 ---
 
-## **Features**
+- 🎨 **Colorized Output**:
 
-- Detailed test status logging for passed and failed tests.
-- Comprehensive failure summaries with error messages, stack traces, and execution time.
-- Random inspirational or humorous quotes for passed or failed test suites.
-- Fully compatible with Playwright's test runner.
-- Outputs logs to both the console and a file for easier debugging.
+    - ✅ Passed tests (Green)
+    - ❌ Failed tests (Red)
+    - 🔄 Retry attempts (Yellow)
+    - ⚠️ Skipped tests (Gray)
 
----
+- 📊 **Detailed Metrics**:
+    - Total test execution time
+    - Average test duration
+    - Slowest test identification
+    - Top slowest tests list
+    - Pass/fail statistics
 
 ## **Installation**
 
@@ -56,7 +60,6 @@ export default defineConfig({
 ✅ All 9 tests passed | ⏱ Total: 13.28s
 - Average passed test time: 6.30s
 - Slowest test took: 12.34s
-- Total retries: 0
 "“All systems go!” - NASA"
 ```
 

@@ -52,4 +52,6 @@ export const colors = {
     bgMagenta: '\x1b[45m',
     bgCyan: '\x1b[46m',
     bgWhite: '\x1b[47m',
+
+    fgGray: '\x1b[90m',
 };
