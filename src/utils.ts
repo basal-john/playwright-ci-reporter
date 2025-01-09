@@ -130,6 +130,18 @@ export class Logger {
         }
 
         this.logMetrics(summary);
+
+        // Add warning for skipped tests
+        if (summary.skippedCount > 0) {
+            console.log(
+                `\n${colors.fgYellow}⚠️  Warning: ${summary.skippedCount} test${
+                    summary.skippedCount === 1 ? ' was' : 's were'
+                } skipped.${colors.reset}`,
+            );
+            console.log(
+                `${colors.fgYellow}   Please ensure to test the skipped scenarios manually before deployment.${colors.reset}`,
+            );
+        }
     }
 
     /**
