@@ -8,9 +8,9 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Features
 
-- add error handling for no tests found in CustomReporter ([7694486](https://github.com/basal-john/playwright-ci-reporter/commit/76944866e690d5a8e2a8a96dbe1a06155c8d7d1d))
-- add quotes and JSON summary writer for test results ([73b5cc9](https://github.com/basal-john/playwright-ci-reporter/commit/73b5cc99de47068e40e46d974cfc9003c92557c5))
-- log slowest tests in CustomReporter ([80fec6c](https://github.com/basal-john/playwright-ci-reporter/commit/80fec6c561565608b2d0274ae3f6e1295ef194bf))
+-   add error handling for no tests found in CustomReporter ([7694486](https://github.com/basal-john/playwright-ci-reporter/commit/76944866e690d5a8e2a8a96dbe1a06155c8d7d1d))
+-   add quotes and JSON summary writer for test results ([73b5cc9](https://github.com/basal-john/playwright-ci-reporter/commit/73b5cc99de47068e40e46d974cfc9003c92557c5))
+-   log slowest tests in CustomReporter ([80fec6c](https://github.com/basal-john/playwright-ci-reporter/commit/80fec6c561565608b2d0274ae3f6e1295ef194bf))
 
 ### [1.2.1](https://github.com/basal-john/playwright-ci-reporter/compare/v1.2.0...v1.2.1) (2024-12-31)
 
@@ -18,7 +18,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Features
 
-- add top 3 slowest tests ([6eccdde](https://github.com/basal-john/playwright-ci-reporter/commit/6eccdde93939fb18e5daabdb5b80c7ae8a2e5215))
+-   add top 3 slowest tests ([6eccdde](https://github.com/basal-john/playwright-ci-reporter/commit/6eccdde93939fb18e5daabdb5b80c7ae8a2e5215))
 
 ### [1.1.19](https://github.com/basal-john/playwright-ci-reporter/compare/v1.1.18...v1.1.19) (2024-12-29)
 
@@ -60,7 +60,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Features
 
-- **reporter:** track test run duration and log start time ([7c56d54](https://github.com/basal-john/playwright-ci-reporter/commit/7c56d54672bf834a4e335662abd3c495d099707c))
+-   **reporter:** track test run duration and log start time ([7c56d54](https://github.com/basal-john/playwright-ci-reporter/commit/7c56d54672bf834a4e335662abd3c495d099707c))
 
 ### [1.0.8](https://github.com/basal-john/playwright-ci-reporter/compare/v1.0.7...v1.0.8) (2024-12-06)
 

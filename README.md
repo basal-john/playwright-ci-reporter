@@ -4,36 +4,36 @@ A modern, maintainable custom reporter for Playwright tests that enhances your t
 
 ## **✨ Features**
 
-- 🎨 **Smart Colorized Output**:
+-   🎨 **Smart Colorized Output**:
 
-    - ✅ Passed tests (Green)
-    - ❌ Failed tests (Red)
-    - 🔄 Retry attempts (Yellow)
-    - ⚠️ Skipped tests (Gray)
-    - 🚀 Test run status (Cyan)
+    -   ✅ Passed tests (Green)
+    -   ❌ Failed tests (Red)
+    -   🔄 Retry attempts (Yellow)
+    -   ⚠️ Skipped tests (Gray)
+    -   🚀 Test run status (Cyan)
 
-- 📊 **Comprehensive Metrics**:
+-   📊 **Comprehensive Metrics**:
 
-    - Total execution time with smart formatting
-    - Average test duration analysis
-    - Slowest test identification
-    - Top slowest tests ranking
-    - Pass/fail/skip statistics
+    -   Total execution time with smart formatting
+    -   Average test duration analysis
+    -   Slowest test identification
+    -   Top slowest tests ranking
+    -   Pass/fail/skip statistics
 
-- 🛠 **Advanced Features**:
+-   🛠 **Advanced Features**:
 
-    - Configurable slow test thresholds
-    - Timeout warnings
-    - Stack trace controls
-    - Retry attempt tracking
-    - Manual testing reminders for skipped tests
+    -   Configurable slow test thresholds
+    -   Timeout warnings
+    -   Stack trace controls
+    -   Retry attempt tracking
+    -   Manual testing reminders for skipped tests
 
-- 📝 **Intelligent Reporting**:
-    - Detailed failure analysis
-    - Clear error messages
-    - Formatted stack traces
-    - Test timing insights
-    - Skipped test warnings
+-   📝 **Intelligent Reporting**:
+    -   Detailed failure analysis
+    -   Clear error messages
+    -   Formatted stack traces
+    -   Test timing insights
+    -   Skipped test warnings
 
 ## **🚀 Installation**
 
@@ -130,10 +130,10 @@ We welcome contributions! Here's how you can help:
 
 Please ensure your PR:
 
-- Follows the existing code style
-- Includes appropriate tests
-- Updates documentation as needed
-- Describes the changes made
+-   Follows the existing code style
+-   Includes appropriate tests
+-   Updates documentation as needed
+-   Describes the changes made
 
 ---
 
@@ -145,6 +145,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## **🙏 Acknowledgments**
 
-- Built with [Playwright](https://playwright.dev/)
-- Inspired by the need for better test reporting in CI/CD pipelines
-- Thanks to all contributors who help make this reporter better
+-   Built with [Playwright](https://playwright.dev/)
+-   Inspired by the need for better test reporting in CI/CD pipelines
+-   Thanks to all contributors who help make this reporter better

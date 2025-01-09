@@ -160,8 +160,7 @@ export class Logger {
 
             summary.slowestTests.forEach((test, index) => {
                 console.log(
-                    `${colors.reset}  ${index + 1}. ${test.title}: ` +
-                        `${colors.fgYellow}${test.duration.toFixed(2)}s${colors.reset}`,
+                    `  ${index + 1}. ${test.title}: ` + `${colors.fgYellow}${test.duration.toFixed(2)}s${colors.reset}`,
                 );
             });
         }
