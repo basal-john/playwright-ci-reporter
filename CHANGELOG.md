@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [1.5.0](https://github.com/basal-john/playwright-ci-reporter/compare/v1.4.0...v1.5.0) (2025-01-09)
+
+
+### Features
+
+* enhance CustomReporter with improved logging and metrics ([f51bfe0](https://github.com/basal-john/playwright-ci-reporter/commit/f51bfe0f7b42a9edcbca4abfbf31a6ec14c23cca))
+* update Quotes with new humorous test-related quotes ([079de88](https://github.com/basal-john/playwright-ci-reporter/commit/079de8838bcd21a5f4bcbe819007a52dd450b877))
+
 ## [1.4.0](https://github.com/basal-john/playwright-ci-reporter/compare/v1.3.1...v1.4.0) (2025-01-09)
 
 ### Features
