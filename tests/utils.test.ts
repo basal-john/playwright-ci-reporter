@@ -1,6 +1,6 @@
-import {TestUtils} from '../src/utils';
+import {TestUtils} from '../src/Utils';
 import {TestCase, TestResult} from '@playwright/test/reporter';
-import {TestRecord} from '../src/types';
+import {TestRecord} from '../src/Types';
 
 describe('TestUtils', () => {
     describe('formatTime', () => {

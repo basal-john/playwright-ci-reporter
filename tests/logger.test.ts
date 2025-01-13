@@ -1,5 +1,5 @@
-import {Logger} from '../src/utils';
-import {TestSummary, TestFailure} from '../src/types';
+import {Logger} from '../src/Utils';
+import {TestSummary, TestFailure} from '../src/Types';
 
 describe('Logger', () => {
     let consoleLogSpy: jest.SpyInstance;

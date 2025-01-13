@@ -1,8 +1,8 @@
 import {Reporter, TestCase, TestResult, FullConfig, Suite} from '@playwright/test/reporter';
 import {colors} from './Colors';
 import {getRandomQuote, FAILURE_QUOTES, SUCCESS_QUOTES} from './Quotes';
-import {TestRecord, ReporterConfig, TestSummary} from './types';
-import {TestUtils, Logger} from './utils';
+import {TestRecord, ReporterConfig, TestSummary} from './Types';
+import {TestUtils, Logger} from './Utils';
 
 /**
  * CustomReporterConfig is a modern, maintainable reporter for Playwright tests.

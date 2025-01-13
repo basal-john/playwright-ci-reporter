@@ -1,4 +1,4 @@
-import {TestRecord, TestSummary, SlowTest, TestFailure} from './types';
+import {TestRecord, TestSummary, SlowTest, TestFailure} from './Types';
 import {colors} from './Colors';
 
 /**
