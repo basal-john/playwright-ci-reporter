@@ -7,7 +7,7 @@ export const FAILURE_QUOTES = [
     'May the tests be ever in your favor - Hunger Games',
     'To err is human, to test is divine',
     'Keep calm and write more tests',
-    "Tests: 'I'll be back... failing' - Terminator",
+    "Tests: 'I'll be back.... failing' - Terminator",
     'The first rule of Test Club: Always talk about Test Club - Fight Club',
     'Houston, we have a testing problem - Apollo 13',
     "You can't handle the test! - A Few Good Men",
