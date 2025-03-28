@@ -1,7 +1,7 @@
 import {Reporter, TestCase, TestResult, FullConfig, Suite} from '@playwright/test/reporter';
 import {colors} from './Colors';
 import {getRandomQuote, FAILURE_QUOTES, SUCCESS_QUOTES} from './Quotes';
-import {TestRecord, ReporterConfig, TestSummary} from './Types';
+import {TestRecord, ReporterConfig, TestSummary, TestError} from './Types';
 import {TestUtils, Logger} from './Utils';
 
 /**
@@ -15,11 +15,14 @@ import {TestUtils, Logger} from './Utils';
  * - Configurable thresholds for slow tests and timeouts
  * - Comprehensive error reporting with stack traces
  * - Support for test retries with clear status indication
+ * - Complete monitoring of all error types including setup/teardown errors
  */
 export default class CustomReporterConfig implements Reporter {
     private readonly _testRecords = new Map<string, TestRecord>();
     private _startTime: number = 0;
     private readonly _config: Required<ReporterConfig>;
+    private _nonTestErrors: Error[] = [];
+    private _hasInterruptedTests: boolean = false;
 
     /**
      * Creates a new instance of the CustomReporterConfig.
@@ -68,6 +71,7 @@ export default class CustomReporterConfig implements Reporter {
     /**
      * Called when an error occurs during test setup or teardown.
      * Logs the error with optional stack trace based on configuration.
+     * Now tracks errors to ensure they affect final exit code.
      *
      * @param error - The error that occurred
      */
@@ -76,11 +80,15 @@ export default class CustomReporterConfig implements Reporter {
         if (error.stack && this._config.showStackTrace) {
             console.error(`${colors.fgRed}${error.stack}${colors.reset}`);
         }
+
+        // Track non-test errors to include in final reporting
+        this._nonTestErrors.push(error);
     }
 
     /**
      * Called when a test completes (whether passed, failed, or skipped).
      * Records the test result and logs appropriate output based on the test status.
+     * Now tracks all test statuses including interrupted ones.
      *
      * @param test - The test case that completed
      * @param result - The result of the test execution
@@ -105,6 +113,11 @@ export default class CustomReporterConfig implements Reporter {
             })),
         });
 
+        // Track interrupted tests specifically
+        if (result.status === 'interrupted') {
+            this._hasInterruptedTests = true;
+        }
+
         // Log test outcome with appropriate formatting
         this._logTestOutcome(test.title, result, timeTakenSec);
     }
@@ -112,6 +125,7 @@ export default class CustomReporterConfig implements Reporter {
     /**
      * Called when all tests have completed.
      * Processes results, displays summary statistics, and sets appropriate exit code.
+     * Now properly handles all error conditions including non-test errors.
      */
     public onEnd(): void {
         const endTime = Date.now();
@@ -126,7 +140,8 @@ export default class CustomReporterConfig implements Reporter {
         // Handle no tests case
         if (testCount === 0) {
             console.log(`${colors.fgRed}❌ No tests found${colors.reset}`);
-            process.exit(1);
+            this._exitWithError();
+            return;
         }
 
         // Compute metrics
@@ -144,19 +159,63 @@ export default class CustomReporterConfig implements Reporter {
         // Log results
         Logger.logSummary(summary);
 
+        // Report non-test errors
+        if (this._nonTestErrors.length > 0) {
+            console.log(`${colors.fgRed}\nSetup or Teardown Errors:${colors.reset}`);
+            this._nonTestErrors.forEach((error, index) => {
+                console.log(`${colors.fgRed}Error #${index + 1}: ${error.message}${colors.reset}`);
+                if (error.stack && this._config.showStackTrace) {
+                    console.log(`${colors.fgRed}${error.stack}${colors.reset}`);
+                }
+            });
+        }
+
+        // Report test failures
         if (failures.length > 0) {
             Logger.logFailures(failures);
+        }
+
+        // Handle interrupted tests
+        if (this._hasInterruptedTests) {
+            console.log(
+                `${colors.fgRed}\n⚠️ Some tests were interrupted. This may indicate a test hang or timeout.${colors.reset}`,
+            );
+        }
+
+        // Determine exit status (any errors should cause a non-zero exit)
+        const hasErrors = failures.length > 0 || this._nonTestErrors.length > 0 || this._hasInterruptedTests;
+
+        if (hasErrors) {
             console.log(`${colors.fgRed}"${getRandomQuote(FAILURE_QUOTES)}"${colors.reset}`);
-            process.exit(1);
+            this._exitWithError();
         } else {
             console.log(`${colors.fgGreen}"${getRandomQuote(SUCCESS_QUOTES)}"${colors.reset}`);
-            process.exit(0);
+            this._exitWithSuccess();
         }
+    }
+
+    /**
+     * Exits the process with a success code.
+     * Extracted to a method to make the flow clearer and more maintainable.
+     * @private
+     */
+    private _exitWithSuccess(): void {
+        process.exitCode = 0;
+    }
+
+    /**
+     * Exits the process with an error code.
+     * Extracted to a method to make the flow clearer and more maintainable.
+     * @private
+     */
+    private _exitWithError(): void {
+        process.exitCode = 1;
     }
 
     /**
      * Formats and logs the outcome of a single test with appropriate coloring.
      * Handles different test states (passed, failed, skipped) and retry attempts.
+     * Now includes handling for interrupted tests and other unexpected statuses.
      *
      * @param title - The title of the test
      * @param result - The result of the test execution
@@ -185,6 +244,16 @@ export default class CustomReporterConfig implements Reporter {
 
             case 'skipped':
                 console.log(`${colors.fgGray}⚠️ ${title} was skipped${colors.reset}`);
+                break;
+
+            case 'interrupted':
+                console.log(`${colors.fgRed}🛑 ${title} was interrupted${colors.reset}`);
+                break;
+
+            default:
+                console.log(
+                    `${colors.fgRed}⚠️ ${title} ended with unknown status: ${result.status} in ${timeTakenFormatted}s${colors.reset}`,
+                );
                 break;
         }
     }

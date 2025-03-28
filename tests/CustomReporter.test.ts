@@ -5,7 +5,7 @@ describe('CustomReporterConfig', () => {
     let reporter: CustomReporterConfig;
     let consoleLogSpy: jest.SpyInstance;
     let consoleErrorSpy: jest.SpyInstance;
-    let processExitSpy: jest.SpyInstance;
+    let processExitCodeSpy: jest.SpyInstance;
 
     beforeEach(() => {
         reporter = new CustomReporterConfig({
@@ -16,7 +16,7 @@ describe('CustomReporterConfig', () => {
         });
         consoleLogSpy = jest.spyOn(console, 'log').mockImplementation();
         consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation();
-        processExitSpy = jest.spyOn(process, 'exit').mockImplementation(() => undefined as never);
+        processExitCodeSpy = jest.spyOn(process, 'exitCode', 'set');
         jest.useFakeTimers();
     });
 
@@ -25,7 +25,12 @@ describe('CustomReporterConfig', () => {
         jest.useRealTimers();
     });
 
-    // Helper functions
+    /**
+     * Creates a mock TestCase object for testing
+     * @param title The test title
+     * @param outcome The test outcome
+     * @returns A mock TestCase object
+     */
     const createMockTest = (title: string, outcome: string = 'expected'): TestCase => {
         const test = {
             title,
@@ -47,6 +52,12 @@ describe('CustomReporterConfig', () => {
         return test;
     };
 
+    /**
+     * Creates a mock TestResult object for testing
+     * @param status The test status
+     * @param retry The retry attempt number
+     * @returns A mock TestResult object
+     */
     const createMockResult = (status: TestResult['status'], retry = 0): TestResult => ({
         status,
         duration: 1000,
@@ -62,6 +73,11 @@ describe('CustomReporterConfig', () => {
     });
 
     describe('onBegin', () => {
+        /**
+         * Creates a mock configuration object
+         * @param workers Number of worker processes
+         * @returns A mock configuration object
+         */
         const createMockConfig = (workers: number = 1) => ({
             workers,
             forbidOnly: false,
@@ -81,6 +97,12 @@ describe('CustomReporterConfig', () => {
             webServer: null,
         });
 
+        /**
+         * Creates a mock test suite
+         * @param testCount Number of tests in the suite
+         * @param childSuites Array of child suites
+         * @returns A mock suite object
+         */
         const createMockSuite = (testCount: number = 1, childSuites: any[] = []) => ({
             title: '',
             location: {file: '', line: 0, column: 0},
@@ -133,6 +155,14 @@ describe('CustomReporterConfig', () => {
             const error = new Error('Test error');
             reporter.onError(error);
             expect(consoleErrorSpy).not.toHaveBeenCalledWith(expect.stringContaining(error.stack!));
+        });
+
+        it('should track non-test errors for final reporting', () => {
+            const error = new Error('Test error');
+            reporter.onError(error);
+
+            reporter.onEnd();
+            expect(processExitCodeSpy).toHaveBeenCalledWith(1);
         });
     });
 
@@ -187,7 +217,7 @@ describe('CustomReporterConfig', () => {
         it('should handle no tests case', () => {
             reporter.onEnd();
             expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('No tests found'));
-            expect(processExitSpy).toHaveBeenCalledWith(1);
+            expect(processExitCodeSpy).toHaveBeenCalledWith(1);
         });
 
         it('should log success message when all tests pass', () => {
@@ -198,7 +228,7 @@ describe('CustomReporterConfig', () => {
             reporter.onEnd();
 
             expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('✅ All'));
-            expect(processExitSpy).toHaveBeenCalledWith(0);
+            expect(processExitCodeSpy).toHaveBeenCalledWith(0);
         });
 
         it('should log failure message when tests fail', () => {
@@ -212,7 +242,18 @@ describe('CustomReporterConfig', () => {
             reporter.onEnd();
 
             expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('❌'));
-            expect(processExitSpy).toHaveBeenCalledWith(1);
+            expect(processExitCodeSpy).toHaveBeenCalledWith(1);
+        });
+
+        it('should handle interrupted tests correctly', () => {
+            const test = createMockTest('Test 1');
+            const result = createMockResult('interrupted');
+
+            reporter.onTestEnd(test, result);
+            reporter.onEnd();
+
+            expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining('interrupted'));
+            expect(processExitCodeSpy).toHaveBeenCalledWith(1);
         });
     });
 });

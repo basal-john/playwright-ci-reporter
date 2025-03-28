@@ -90,6 +90,17 @@ export class TestUtils {
                 });
             } else if (finalOutcome === 'skipped') {
                 skippedCount++;
+            } else {
+                const errorMessage =
+                    finalAttempt.status === 'interrupted' ? 'Test was interrupted' : `Unknown outcome: ${finalOutcome}`;
+
+                failures.push({
+                    title: test.title,
+                    message: errorMessage,
+                    stack: '',
+                    timeTaken: finalAttempt.duration,
+                    isTimeout: false,
+                });
             }
         }
 

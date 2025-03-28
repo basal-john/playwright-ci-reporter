@@ -33,6 +33,13 @@ describe('TestUtils', () => {
 
     describe('findSlowestTests', () => {
         const mockTestCase = {title: 'Test'} as TestCase;
+
+        /**
+         * Creates a test record with the specified title and durations
+         * @param title The test title
+         * @param durations Array of durations for test attempts
+         * @returns A tuple containing the title and TestRecord
+         */
         const createTestRecord = (title: string, durations: number[]): [string, TestRecord] => [
             title,
             {
@@ -78,17 +85,29 @@ describe('TestUtils', () => {
 
     describe('processTestResults', () => {
         const mockTestCase = {title: 'Test', outcome: () => 'expected'} as TestCase;
+
+        /**
+         * Creates a test record for testing with specific outcome and error state
+         * @param title The test title
+         * @param outcome The test outcome (expected, unexpected, skipped, flaky)
+         * @param error Optional error details
+         * @param status Optional explicit test status
+         * @returns A tuple containing the title and TestRecord
+         */
         const createTestRecord = (
             title: string,
             outcome: 'expected' | 'unexpected' | 'skipped' | 'flaky',
             error?: {message: string; stack?: string},
+            status?: TestResult['status'],
         ): [string, TestRecord] => [
             title,
             {
                 test: {...mockTestCase, title, outcome: () => outcome},
                 attempts: [
                     {
-                        status: outcome === 'expected' ? 'passed' : outcome === 'unexpected' ? 'failed' : 'skipped',
+                        status:
+                            status ||
+                            (outcome === 'expected' ? 'passed' : outcome === 'unexpected' ? 'failed' : 'skipped'),
                         duration: 1,
                         errors: error ? [error] : [],
                     },
@@ -136,6 +155,52 @@ describe('TestUtils', () => {
 
             const results = TestUtils.processTestResults(testRecords);
             expect(results.failures[0].isTimeout).toBe(true);
+        });
+
+        it('should handle interrupted tests correctly', () => {
+            const testRecords = new Map([
+                [
+                    'Interrupted Test',
+                    {
+                        test: {...mockTestCase, title: 'Interrupted Test', outcome: () => 'unknown-outcome' as any},
+                        attempts: [
+                            {
+                                status: 'interrupted' as TestResult['status'],
+                                duration: 1,
+                                errors: [],
+                            },
+                        ],
+                    },
+                ],
+            ]);
+
+            const results = TestUtils.processTestResults(testRecords);
+            expect(results.failures).toHaveLength(1);
+            expect(results.failures[0].title).toBe('Interrupted Test');
+            expect(results.failures[0].message).toBe('Test was interrupted');
+        });
+
+        it('should handle unknown test outcomes as failures', () => {
+            const testRecords = new Map([
+                [
+                    'Unknown Test',
+                    {
+                        test: {...mockTestCase, title: 'Unknown Test', outcome: () => 'unknown-outcome' as any},
+                        attempts: [
+                            {
+                                status: 'failed' as TestResult['status'],
+                                duration: 1,
+                                errors: [],
+                            },
+                        ],
+                    },
+                ],
+            ]);
+
+            const results = TestUtils.processTestResults(testRecords);
+            expect(results.failures).toHaveLength(1);
+            expect(results.failures[0].title).toBe('Unknown Test');
+            expect(results.failures[0].message).toContain('Unknown outcome');
         });
     });
 });
